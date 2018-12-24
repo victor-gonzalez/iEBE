@@ -8,3 +8,16 @@ obj/
 tests/
 *.pyc
 *.txt
+
+# ECLIPSE IDE files
+.cproject
+.project
+.pydevproject
+.settings/
+
+# running stuff
+PlayGround/
+RESULTS/
+saved_configs.py
+
+
