@@ -114,8 +114,7 @@ for i in range(1, numberOfJobs+1):
     # copy folder
     copytree(ebeNodeFolder, targetWorkingFolder)
     open(path.join(targetWorkingFolder, "job-%d.slurm" % i), "w").write(
-"""
-#!/bin/bash
+"""#!/bin/bash
 #SBATCH --job-name=iEBE-%d
 #SBATCH --time=%s
 #SBATCH --output=RunRecord.txt
@@ -130,7 +129,7 @@ mv ./finalResults %s/job-%d
 """ % (i, walltime, targetWorkingFolder, crankFolderName, numberOfEventsPerJob, resultsFolder, i)
     )
     if compressResultsFolderAnswer == "yes":
-        open(path.join(targetWorkingFolder, "job-%d.pbs" % i), "a").write(
+        open(path.join(targetWorkingFolder, "job-%d.slurm" % i), "a").write(
 """
 (cd %s
     zip -r -m -q job-%d.zip job-%d
@@ -147,11 +146,10 @@ if compressResultsFolderAnswer == "yes":
     copytree(path.join(ebeNodeFolder, EbeCollectorFolder), path.join(watcherDirectory, ebeNodeFolder, EbeCollectorFolder))
     copytree(utilitiesFolder, path.join(watcherDirectory, utilitiesFolder))
     open(path.join(watcherDirectory, "watcher.slurm"), "w").write(
-"""
-#!/bin/bash
+"""#!/bin/bash
 #SBATCH --job-name=watcher
 #SBATCH --time=%s
-#SBATCH --outpput=WatcherReport.txt
+#SBATCH --output=WatcherReport.txt
 #SBATCH --error=WatcherReport.err
 #SBATCH --workdir=%s
 (cd %s
