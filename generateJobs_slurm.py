@@ -117,12 +117,10 @@ for i in range(1, numberOfJobs+1):
 """#!/bin/bash
 #SBATCH --job-name=iEBE-%d
 #SBATCH --time=%s
-#SBATCH --output=RunRecord.txt
-#SBATCH --error=RunRecord.txt
 #SBATCH --workdir=%s
 (cd %s
     ulimit -n 1000
-    python ./SequentialEventDriver_shell.py %d 
+    python ./SequentialEventDriver_shell.py %d 1> RunRecord.txt 2> ErrorRecord.txt
     cp RunRecord.txt ErrorRecord.txt ../finalResults/
 )
 mv ./finalResults %s/job-%d
@@ -149,11 +147,9 @@ if compressResultsFolderAnswer == "yes":
 """#!/bin/bash
 #SBATCH --job-name=watcher
 #SBATCH --time=%s
-#SBATCH --output=WatcherReport.txt
-#SBATCH --error=WatcherReport.err
 #SBATCH --workdir=%s
 (cd %s
-    python autoZippedResultsCombiner.py %s %d "job-(\d*).zip" 60 
+    python autoZippedResultsCombiner.py %s %d "job-(\d*).zip" 60 1> WatcherReport.txt 2> WatcherReport.txt
     mv WatcherReport.txt %s
 )
 """ % (walltime, watcherDirectory, utilitiesFolder, resultsFolder, numberOfJobs, resultsFolder)
