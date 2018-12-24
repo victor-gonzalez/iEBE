@@ -115,7 +115,7 @@ for i in range(1, numberOfJobs+1):
     copytree(ebeNodeFolder, targetWorkingFolder)
     open(path.join(targetWorkingFolder, "job-%d.slurm" % i), "w").write(
 """
-#!/usr/bin/env bash
+#!/bin/bash
 #SBATCH --job-name=iEBE-%d
 #SBATCH --time=%s
 #SBATCH --output=RunRecord.txt
@@ -148,7 +148,7 @@ if compressResultsFolderAnswer == "yes":
     copytree(utilitiesFolder, path.join(watcherDirectory, utilitiesFolder))
     open(path.join(watcherDirectory, "watcher.slurm"), "w").write(
 """
-#!/usr/bin/env bash
+#!/bin/bash
 #SBATCH --job-name=watcher
 #SBATCH --time=%s
 #SBATCH --outpput=WatcherReport.txt
