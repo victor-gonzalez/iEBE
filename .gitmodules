@@ -1,0 +1,3 @@
+[submodule "EBE-Node/music-hydro"]
+	path = EBE-Node/music-hydro
+	url = https://victor-gonzalez@git.code.sf.net/u/victor-gonzalez/music-hydro
