@@ -121,7 +121,8 @@ preEquilibriumParameters = {
 }
 
 hydroControl = {
-    'mainDir'               :   'VISHNew',
+    'hydroevolution'        :   'MUSIC', # MUSIC, VISHNew
+    'mainDir'               :   'music-hydro',
     'initialConditionDir'   :   'Initial', # hydro initial condition folder, relative
     'initialConditionFile'  :   'InitialSd.dat', # IC filename
     'resultDir'             :   'results', # hydro results folder, relative
@@ -129,8 +130,10 @@ hydroControl = {
     'saveICFile'            :   True, # whether to save initial condition file
     'saveResultGlobs'       :   ['*.h5','surface.dat', 'dec*.dat', 'ecc*.dat'], 
                                 # files match these globs will be saved
-    'executable'            :   'VISHNew.e',
+    'executable'            :   'mpihydro',
+    'parameters'            :   hydroMusicParameters
 }
+
 hydroParameters = {
     'IINIT'     :   2,
     'IEOS'      :   7,
@@ -149,6 +152,36 @@ hydroParameters = {
     'factor'    :   1.0,
     'IhydroJetoutput'   :   1,   # switch for output hydro evolution history into hdf5 file
     'InitialURead'      :   1,   # switch to read in initial flow velocity and shear tensor
+}
+
+hydroMusicParameters = {
+    'echo_level'                    :   5,      # let's verbose for the time being
+    'mode'                          :   2,      # evolution only
+    'Initial_profile'               :   8,      # Read in initial profile from a file 
+    'Initial_Distribution_Filename' :   'TO_INITIALIZED_WITH_INPUT_FILE',
+    's_factor'                      :   1.0,    # normalization factor read in initial data file
+    'boost_invariant'               :   1,      # whether the simulation is boost-invariant
+    'Initial_time_tau_0'            :   0.6,    # starting time of the hydrodynamic evolution (fm/c)
+    'Total_evolution_time_tau'      :   30.0,   # the maximum allowed running evolution time (fm/c)
+    'Delta_Tau'                     :   0.04,   # time step to use in the evolution [fm/c]
+    'Eta_grid_size'                 :   14.0,   # spatial rapidity range
+    'Grid_size_in_eta'              :   4,      # number of the grid points in spatial rapidity direction
+    'X_grid_size_in_fm'             :   26.0,   # spatial range along x direction in the transverse plane
+    'Y_grid_size_in_fm'             :   26.0,   # spatial range along y direction in the transverse plane
+    'Grid_size_in_y'                :   260,    # number of the grid points in y direction
+    'Grid_size_in_x'                :   260,    # number of the grid points in x direction
+    'EOS_to_use'                    :   7,      # lattice EOS s95p-v1.2 (for UrQMD)
+    'Viscosity_Flag_Yes_1_No_0'     :   1,      # turn on viscosity in the evolution
+    'Include_Shear_Visc_Yes_1_No_0' :   1,      # include shear viscous effect
+    'Shear_to_S_ratio'              :   0.08,   # value of \eta/s
+    'T_dependent_Shear_to_S_ratio'  :   1,      # switch to turn on temperature dependent eta/s(T)
+    'Include_Bulk_Visc_Yes_1_No_0'  :   1,      # include bulk viscous effect
+    'Include_second_order_terms'    :   1,      # include second order coupling terms
+    'freeze_out_method'             :   2,      # Schenke's more complex method
+    'average_surface_over_this_many_time_steps' : 5,   # the step skipped in the tau direction
+    'epsilon_freeze'                :   0.18,   # the freeze out energy density (GeV/fm^3)
+    'use_eps_for_freeze_out'        :   1,      # flag to use energy density as criteria to find freeze-out surface 0: use temperature, 1: use energy density
+    'T_freeze'                      :   0.135,  # freeze-out temperature (GeV)
 }
 
 iSSControl = {
@@ -448,8 +481,9 @@ def hydroWithInitialCondition(aFile):
     # set directory strings
     hydroDirectory = path.join(controlParameterList['rootDir'], 
                                hydroControl['mainDir'])
-    hydroICDirectory = path.join(hydroDirectory, 
-                                 hydroControl['initialConditionDir'])
+    if hydroControl['hydroevolution'] is not 'MUSIC' :
+        hydroICDirectory = path.join(hydroDirectory, 
+                                     hydroControl['initialConditionDir'])
     hydroResultsDirectory = path.join(hydroDirectory, 
                                       hydroControl['resultDir'])
     hydroExecutable = hydroControl['executable']
@@ -458,7 +492,8 @@ def hydroWithInitialCondition(aFile):
     checkExistenceOfExecutable(path.join(hydroDirectory, hydroExecutable))
 
     # clean up initial and results folder
-    cleanUpFolder(hydroICDirectory)
+    if hydroControl['hydroevolution'] is not 'MUSIC' :
+        cleanUpFolder(hydroICDirectory)
     cleanUpFolder(hydroResultsDirectory)
 
     # check existence of the initial conditions
@@ -471,14 +506,26 @@ def hydroWithInitialCondition(aFile):
         copy(aFile, controlParameterList['eventResultDir'])
 
     # move initial condition to the designated folder
-    move(aFile, path.join(hydroICDirectory, 
-                          hydroControl['initialConditionFile']))
+    if hydroControl['hydroevolution'] is 'MUSIC' :
+        hydroControl['parameters']['Initial_Distribution_Filename'] = afile
+    else :
+        move(aFile, path.join(hydroICDirectory, 
+                              hydroControl['initialConditionFile']))
 
-    # form assignment string
-    assignments = formAssignmentStringFromDict(hydroParameters)
-    # form executable string
-    executableString = ("nice -n %d ./" % (ProcessNiceness) 
-                        + hydroExecutable + assignments)
+    # build configuration and executable string
+    if hydroControl['hydroevolution'] is 'MUSIC' :
+        # form configuration file
+        music_config_file = path.join(hydroDirectory,'music_config_file')
+        formConfigFileFromDict(music_config_file,hydroControl['parameters'])
+        # form executable string
+        executableString = ("nice -n %d mpirun -np 1 ./" % (ProcessNiceness) 
+                            + hydroExecutable + '' + music_config_file)
+    else :
+        # form assignment string
+        assignments = formAssignmentStringFromDict(hydroControl['parameters'])
+        # form executable string
+        executableString = ("nice -n %d ./" % (ProcessNiceness) 
+                            + hydroExecutable + assignments)
     # execute!
     run(executableString, cwd=hydroDirectory)
 
@@ -501,6 +548,10 @@ def hydro_with_pre_equilbirium(aFile):
         the given absolute path to an initial condition. Yield the result 
         files.
     """
+    # TODO: adapt it to MUSIC hydro evolution
+    if hydroControl['hydroevolution'] is 'MUSIC' :
+        raise ExecutionError("Hydro with pre-equilibrium still not adapted to MUSIC!")
+    
     ProcessNiceness = controlParameterList['niceness']
     # set directory strings
     # pre-equilibrium model
@@ -1000,6 +1051,19 @@ def formAssignmentStringFromDict(aDict):
     for aParameter in aDict.keys():
         result += " {}={}".format(aParameter, aDict[aParameter])
     return result
+
+
+def formConfigFileFromDict(afilename,aDict):
+    """
+        Generate a given name configuration file with a parameter-equals-value string per line 
+        from the given dictionary. The last included line is an 'EndOfData'
+    """
+    configlines = ["{}={}".format(aParameter, aDict[aParameter]) for aParameter in aDict.keys()]
+    configlines += ["EndOfData"]
+    afile = open(afilename,'w')
+    afile.writelines(configlines)
+    afile.close()
+
 
 
 def cleanUpFolder(aDir):
