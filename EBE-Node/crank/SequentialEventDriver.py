@@ -391,8 +391,11 @@ def get_pre_generated_initial_conditions_list():
                                        'initial_conditions')
 
     # yield initial conditions
-    file_list = glob(path.join(initial_condition_path,
-              initial_condition_control['pre-generated_initial_file_pattern']))
+    if initial_condition_control['pre-generated_initial_file_read_in_mode'] == 3 :
+        file_list = glob(path.join(initial_condition_path, '*'))
+    else :
+        file_list = glob(path.join(initial_condition_path,
+                  initial_condition_control['pre-generated_initial_file_pattern']))
     for afile in file_list:
         # then yield it
         yield path.join(initial_condition_path, afile)

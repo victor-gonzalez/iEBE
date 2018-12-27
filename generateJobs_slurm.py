@@ -156,14 +156,32 @@ if compressResultsFolderAnswer == "yes":
     )
 
 import ParameterDict
+import random
 initial_condition_type = (
     ParameterDict.initial_condition_control['initial_condition_type'])
 if initial_condition_type == 'pre-generated':
+    read_in_mode = ParameterDict.initial_condition_control['pre-generated_initial_file_read_in_mode']
     initial_file_path = (ParameterDict.initial_condition_control[
                              'pre-generated_initial_file_path'])
-    call("./copy_pre_generated_initial_conditions.sh %d %d %s %s" 
-         % (numberOfJobs, numberOfEventsPerJob, initial_file_path, 
-            workingFolder), shell=True)
+    if read_in_mode == 3 : # IP MUSIC events
+        file_pattern = ParameterDict.initial_condition_control['pre-generated_initial_file_pattern']
+        head_file_pattern = file_pattern.split('[')[0]
+        trail_file_pattern = file_pattern.split('[')[1].split(']')[1]
+        total_nevents = int(file_pattern.split('[')[1].split(']')[0].split('-')[1])
+        nevents = random.sample(xrange(total_nevents+1),numberOfJobs*numberOfEventsPerJob)
+        for jobno in range(numberOfJobs) :
+            targetInitialConditionsFolder = path.join(workingFolder, "job-%d" % jobno+1, "initial_conditions")
+            for eventno in range(numberOfEventsPerJob) :
+                copy('%s/%s%/%s%d%s' 
+                     % (initial_file_path,
+                        ParameterDict.initial_condition_control['centrality'].split('%')[0],
+                        head_file_pattern,
+                        nevents[jobno*numberOfEventsPerJob+eventno],
+                        trail_file_pattern),targetInitialConditionsFolder)
+    else :
+        call("./copy_pre_generated_initial_conditions.sh %d %d %s %s" 
+             % (numberOfJobs, numberOfEventsPerJob, initial_file_path,
+                workingFolder), shell=True)
 
 print("Jobs generated. Submit them using submitJobs scripts.")
 

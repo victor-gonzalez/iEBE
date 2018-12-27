@@ -1,5 +1,5 @@
 controlParameterList = {
-    'simulation_type'       :   'hydroEM_with_decaycocktail', 
+    'simulation_type'       :   'hybrid', 
     # options: 'hybrid', 'hydro', 'hydroEM', 'hydroEM_with_decaycocktail', 
     #          'hydroEM_preEquilibrium', 'hydroEM_with_decaycocktail_with_urqmd'
     'niceness'              :   0,  
@@ -10,13 +10,14 @@ initial_condition_control = {
     'centrality': '30-40%',  # centrality bin
     'cut_type': 'total_entropy',
     # centrality cut variable: total_entropy or Npart
-    'initial_condition_type': 'superMC',
+    'initial_condition_type': 'pre-generated',
     # type of initial conditions: superMC or pre-generated
-    'pre-generated_initial_file_path': 'initial_conditions', 
+    'pre-generated_initial_file_path': '../../vgonzale/IPGLASMA', 
     # file path for the pre-generated initial condition files
-    'pre-generated_initial_file_pattern': 'sd_event_[0-9]*_block.dat',  
+    'pre-generated_initial_file_pattern': 'epsilon-u-Hydro[1-3334].dat',  
     # name pattern for the initial condition files
-    'pre-generated_initial_file_read_in_mode': 2, # read in mode for VISH2+1
+    'pre-generated_initial_file_read_in_mode': 3, 
+    # 2: read in mode for VISH2+1, 3: read in mode for IP Glasma
 }
 
 superMCParameters = {
