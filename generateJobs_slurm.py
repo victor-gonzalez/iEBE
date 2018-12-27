@@ -170,7 +170,7 @@ if initial_condition_type == 'pre-generated':
         total_nevents = int(file_pattern.split('[')[1].split(']')[0].split('-')[1])
         nevents = random.sample(xrange(total_nevents+1),numberOfJobs*numberOfEventsPerJob)
         for jobno in range(numberOfJobs) :
-            targetInitialConditionsFolder = path.join(workingFolder, "job-%d" % jobno+1, "initial_conditions")
+            targetInitialConditionsFolder = path.join(workingFolder, "job-%d" % (jobno+1), "initial_conditions")
             for eventno in range(numberOfEventsPerJob) :
                 copy('%s/%s%/%s%d%s' 
                      % (initial_file_path,
