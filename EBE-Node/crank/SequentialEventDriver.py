@@ -27,6 +27,7 @@ allParameterLists = [
     'preEquilibriumParameters',
     'hydroControl',
     'hydroParameters',
+    'hydroMusicParameters',
     'iSSControl',
     'iSSParameters',
     'iSControl',
@@ -120,20 +121,6 @@ preEquilibriumParameters = {
     'dtau'                  :    0.2,
 }
 
-hydroControl = {
-    'hydroevolution'        :   'MUSIC', # MUSIC, VISHNew
-    'mainDir'               :   'music-hydro',
-    'initialConditionDir'   :   'Initial', # hydro initial condition folder, relative
-    'initialConditionFile'  :   'InitialSd.dat', # IC filename
-    'resultDir'             :   'results', # hydro results folder, relative
-    'resultFiles'           :   '*', # results files
-    'saveICFile'            :   True, # whether to save initial condition file
-    'saveResultGlobs'       :   ['*.h5','surface.dat', 'dec*.dat', 'ecc*.dat'], 
-                                # files match these globs will be saved
-    'executable'            :   'mpihydro',
-    'parameters'            :   hydroMusicParameters
-}
-
 hydroParameters = {
     'IINIT'     :   2,
     'IEOS'      :   7,
@@ -182,6 +169,20 @@ hydroMusicParameters = {
     'epsilon_freeze'                :   0.18,   # the freeze out energy density (GeV/fm^3)
     'use_eps_for_freeze_out'        :   1,      # flag to use energy density as criteria to find freeze-out surface 0: use temperature, 1: use energy density
     'T_freeze'                      :   0.135,  # freeze-out temperature (GeV)
+}
+
+hydroControl = {
+    'hydroevolution'        :   'MUSIC', # MUSIC, VISHNew
+    'mainDir'               :   'music-hydro',
+    'initialConditionDir'   :   'Initial', # hydro initial condition folder, relative
+    'initialConditionFile'  :   'InitialSd.dat', # IC filename
+    'resultDir'             :   'results', # hydro results folder, relative
+    'resultFiles'           :   '*', # results files
+    'saveICFile'            :   True, # whether to save initial condition file
+    'saveResultGlobs'       :   ['*.h5','surface.dat', 'dec*.dat', 'ecc*.dat'], 
+                                # files match these globs will be saved
+    'executable'            :   'mpihydro',
+    'parameters'            :   hydroMusicParameters
 }
 
 iSSControl = {
@@ -507,7 +508,7 @@ def hydroWithInitialCondition(aFile):
 
     # move initial condition to the designated folder
     if hydroControl['hydroevolution'] is 'MUSIC' :
-        hydroControl['parameters']['Initial_Distribution_Filename'] = afile
+        hydroControl['parameters']['Initial_Distribution_Filename'] = aFile
     else :
         move(aFile, path.join(hydroICDirectory, 
                               hydroControl['initialConditionFile']))
@@ -519,7 +520,7 @@ def hydroWithInitialCondition(aFile):
         formConfigFileFromDict(music_config_file,hydroControl['parameters'])
         # form executable string
         executableString = ("nice -n %d mpirun -np 1 ./" % (ProcessNiceness) 
-                            + hydroExecutable + '' + music_config_file)
+                            + hydroExecutable + ' ' + music_config_file)
     else :
         # form assignment string
         assignments = formAssignmentStringFromDict(hydroControl['parameters'])
@@ -528,6 +529,10 @@ def hydroWithInitialCondition(aFile):
                             + hydroExecutable + assignments)
     # execute!
     run(executableString, cwd=hydroDirectory)
+
+    # MUSIC is reluctant to use the results directory so far
+    if hydroControl['hydroevolution'] is 'MUSIC' :
+        move(path.join(hydroDirectory,'surface.dat'), hydroResultsDirectory)
 
     # yield result files
     worthStoring = []
@@ -1055,11 +1060,11 @@ def formAssignmentStringFromDict(aDict):
 
 def formConfigFileFromDict(afilename,aDict):
     """
-        Generate a given name configuration file with a parameter-equals-value string per line 
+        Generate a given name configuration file with a parameter   value string per line 
         from the given dictionary. The last included line is an 'EndOfData'
     """
-    configlines = ["{}={}".format(aParameter, aDict[aParameter]) for aParameter in aDict.keys()]
-    configlines += ["EndOfData"]
+    configlines = ["{}   {}\n".format(aParameter, aDict[aParameter]) for aParameter in aDict.keys()]
+    configlines += ["EndOfData\n"]
     afile = open(afilename,'w')
     afile.writelines(configlines)
     afile.close()

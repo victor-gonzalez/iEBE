@@ -12,7 +12,7 @@ initial_condition_control = {
     # centrality cut variable: total_entropy or Npart
     'initial_condition_type': 'pre-generated',
     # type of initial conditions: superMC or pre-generated
-    'pre-generated_initial_file_path': '../../vgonzale/IPGLASMA', 
+    'pre-generated_initial_file_path': '../IPGLASMA', 
     # file path for the pre-generated initial condition files
     'pre-generated_initial_file_pattern': 'epsilon-u-Hydro[1-3334].dat',  
     # name pattern for the initial condition files
@@ -69,9 +69,10 @@ hydroParameters = {
 }
 
 iSSParameters = {
-    'turn_on_bulk'                  :   0,
-    'include_deltaf_bulk'           :   0,
-    'include_deltaf_shear'          :   0,
+    'hydro_mode'                    :   2,
+    'turn_on_bulk'                  :   1,
+    'include_deltaf_bulk'           :   1,
+    'include_deltaf_shear'          :   1,
     'calculate_vn'                  :   1,
     'MC_sampling'                   :   0,
     'number_of_repeated_sampling'   :   10,
