@@ -192,15 +192,16 @@ iSSControl = {
     'OSCARFile'         :   'OSCAR.DAT',
     'executable'        :   'iSS.e',
 }
+
 iSSParameters = {
-    'turn_on_bulk'                  :   0,
-    'include_deltaf_bulk'           :   0,
-    'include_deltaf_shear'          :   0,
+    'hydro_mode'                    :   1,
+    'turn_on_bulk'                  :   1,
+    'turn_on_shear'                 :   1,
+    'include_deltaf_bulk'           :   1,
+    'include_deltaf_shear'          :   1,
     'calculate_vn'                  :   0,
     'MC_sampling'                   :   2,
-    'number_of_repeated_sampling'   :   10,
-    'y_LB'                          :   -2.5,
-    'y_RB'                          :   2.5,
+    'number_of_repeated_sampling'   :   100,
 }
 
 iSControl = {
@@ -515,8 +516,8 @@ def hydroWithInitialCondition(aFile):
 
     # build configuration and executable string
     if hydroControl['hydroevolution'] is 'MUSIC' :
-        # form configuration file
-        music_config_file = path.join(hydroDirectory,'music_config_file')
+        # form configuration file in results directory
+        music_config_file = path.join(hydroResultsDirectory,'music_input')
         formConfigFileFromDict(music_config_file,hydroControl['parameters'])
         # form executable string
         executableString = ("nice -n %d mpirun -np 1 ./" % (ProcessNiceness) 
