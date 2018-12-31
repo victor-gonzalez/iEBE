@@ -103,6 +103,7 @@ crankFolder = path.join(ebeNodeFolder, crankFolderName)
 
 # copy parameter file into the crank folder
 copy("ParameterDict.py", crankFolder)
+copy("InitialConditions.py",crankFolder)
 
 # backup parameter files to the result folder
 copy(path.join(crankFolder, "SequentialEventDriver.py"), resultsFolder)
