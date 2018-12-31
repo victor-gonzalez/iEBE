@@ -6,7 +6,7 @@
 """
 
 from sys import argv, exit
-from os import makedirs, path, unlink
+from os import makedirs, path, unlink, chmod
 from shutil import copytree, copy, rmtree
 from subprocess import call
 
@@ -37,7 +37,7 @@ try:
     if len(argv)>=argId+1: # set wall time
         walltime = argv[argId]
     else:
-        walltime = "%d:00:00" % (1*numberOfEventsPerJob) # 1 hours per job
+        walltime = "%02d:00:00" % (1*numberOfEventsPerJob) # 1 hours per job
 
     argId += 1
     if len(argv)>=argId+1: # whether to compress final results folder
@@ -113,27 +113,66 @@ for i in range(1, numberOfJobs+1):
     targetWorkingFolder = path.join(workingFolder, "job-%d" % i)
     # copy folder
     copytree(ebeNodeFolder, targetWorkingFolder)
-    open(path.join(targetWorkingFolder, "job-%d.slurm" % i), "w").write(
+
+open(path.join(workingFolder, "jobs.slurm"), "w").write(
 """#!/bin/bash
-#SBATCH --job-name=iEBE-%d
-#SBATCH --time=%s
+#SBATCH --job-name=iEBE-array
+#SBATCH --time=00:10:00
 #SBATCH --workdir=%s
-(cd %s
-    ulimit -n 1000
-    python ./SequentialEventDriver_shell.py %d 1> RunRecord.txt 2> ErrorRecord.txt
-    cp RunRecord.txt ErrorRecord.txt ../finalResults/
+
+    ./jobs.sh
+""" % (workingFolder)
 )
-mv ./finalResults %s/job-%d
-""" % (i, walltime, targetWorkingFolder, crankFolderName, numberOfEventsPerJob, resultsFolder, i)
+
+open(path.join(workingFolder, "jobs.sh"), "w").write(
+"""#!/bin/bash
+NJOBS=%d
+NEVTPERJOB=%d
+WORKDIRBASE=%s
+TIME=%s
+
+CMD="sbatch -J iEBE-batch --array=1-$NJOBS --workdir=$WORKDIRBASE --time=$TIME $WORKDIRBASE/job.sh %s $NEVTPERJOB %s"
+JobID=($(eval $CMD | tee | awk '{print $4}'))
+""" % (numberOfJobs, numberOfEventsPerJob, workingFolder, walltime, crankFolderName, resultsFolder)
+)
+chmod(path.join(workingFolder, "jobs.sh"),0o755)
+
+
+open(path.join(workingFolder, "job.sh"), "w").write(
+"""#!/bin/bash
+CRANKFOLDER=$1
+NEVTPERJOB=$2
+RESULTSFOLDER=$3
+
+source /etc/profile.d/modules.sh
+module use /cvmfs/it.gsi.de/modulefiles/
+module load root/v5-34-14
+export ROOTSYS=/cvmfs/it.gsi.de/root/v5-34-14
+export QMDUSER=$(whoami)
+
+(cd job-$SLURM_ARRAY_TASK_ID
+    (cd $CRANKFOLDER
+        ulimit -n 1000
+        python ./SequentialEventDriver_shell.py $NEVTPERJOB 1> RunRecord.txt 2> ErrorRecord.txt
+        cp RunRecord.txt ErrorRecord.txt ../finalResults/
     )
-    if compressResultsFolderAnswer == "yes":
-        open(path.join(targetWorkingFolder, "job-%d.slurm" % i), "a").write(
-"""
-(cd %s
-    zip -r -m -q job-%d.zip job-%d
+    (cd ./finalResults
+        root -b -q -l "/lustre/nyx/alice/users/$QMDUSER/UrQMDparser/runUrQMDParser.C(\\\"$QMDUSER\\\",\\\"urqmdCombined.txt\\\", $SLURM_ARRAY_TASK_ID)"
+        mv UrQMD_output_$SLURM_ARRAY_TASK_ID.root $RESULTSFOLDER
+    )
+    mv ./finalResults $RESULTSFOLDER/job-$SLURM_ARRAY_TASK_ID
+)    
+""" 
 )
-""" % (resultsFolder, i, i)
-        )
+if compressResultsFolderAnswer == "yes":
+    open(path.join(workingFolder, "job.sh"), "a").write(
+"""
+(cd $RESULTSFOLDER
+    zip -r -m -q job-$SLURM_ARRAY_TASK_ID.zip job-$SLURM_ARRAY_TASK_ID
+)
+"""
+    )
+chmod(path.join(workingFolder, "job.sh"),0o755)
 
 # add a data collector watcher
 if compressResultsFolderAnswer == "yes":
@@ -143,17 +182,25 @@ if compressResultsFolderAnswer == "yes":
     makedirs(path.join(watcherDirectory, ebeNodeFolder))
     copytree(path.join(ebeNodeFolder, EbeCollectorFolder), path.join(watcherDirectory, ebeNodeFolder, EbeCollectorFolder))
     copytree(utilitiesFolder, path.join(watcherDirectory, utilitiesFolder))
-    open(path.join(watcherDirectory, "watcher.slurm"), "w").write(
-"""#!/bin/bash
-#SBATCH --job-name=watcher
-#SBATCH --time=%s
-#SBATCH --workdir=%s
-(cd %s
-    python autoZippedResultsCombiner.py %s %d "job-(\d*).zip" 60 1> WatcherReport.txt 2> WatcherReport.txt
-    mv WatcherReport.txt %s
-)
-""" % (walltime, watcherDirectory, utilitiesFolder, resultsFolder, numberOfJobs, resultsFolder)
+    open(path.join(workingFolder, "jobs.sh"), "a").write(
+"""
+    sbatch -J watcher -d afterany:$JobID --time=%s --workdir=%s %s/watcher.sh %s %s %d
+""" % (walltime, watcherDirectory,watcherDirectory,utilitiesFolder, resultsFolder, numberOfJobs)
     )
+
+    open(path.join(watcherDirectory, "watcher.sh"), "w").write(
+"""#!/bin/bash
+UTILITIESFOLDER=$1
+RESULTSFOLDER=$2
+NUMBEROFJOBS=$3
+(cd $UTILITIESFOLDER
+    python autoZippedResultsCombiner.py $RESULTSFOLDER $NUMBEROFJOBS "job-(\d*).zip" 60 1> WatcherReport.txt 2> WatcherReport.txt
+    mv WatcherReport.txt $RESULTSFOLDER
+)
+""" 
+    )
+    chmod(path.join(watcherDirectory, "watcher.sh"),0o755)
+
 
 import ParameterDict
 import random

@@ -28,13 +28,20 @@ else:
 
 from subprocess import call
 
-for aFolder in listdir(targetWorkingDirectory):
-    subFolder = path.join(targetWorkingDirectory, aFolder)
-    for aFile in listdir(subFolder):
-        if path.splitext(aFile)[1].lower() == '.slurm':
-            commandString = "sbatch %s" % aFile
-            print("Submitting %s in %s..." % (aFile, subFolder))
-            call(commandString, shell=True, cwd=subFolder)
+for mainentry in listdir(targetWorkingDirectory):
+    subFolder = path.join(targetWorkingDirectory, mainentry)
+    if path.isdir(subFolder) :
+        for aFile in listdir(subFolder):
+            if path.splitext(aFile)[1].lower() == '.slurm':
+                commandString = "sbatch %s" % aFile
+                print("Submitting %s in %s..." % (aFile, subFolder))
+                call(commandString, shell=True, cwd=subFolder)
+    else :
+        if path.splitext(mainentry)[1].lower() == '.slurm':
+            commandString = "sbatch %s" % mainentry
+            print("Submitting %s in %s..." % (mainentry, targetWorkingDirectory))
+            call(commandString, shell=True, cwd=targetWorkingDirectory)
+        
 
 print("Job submission done. See RunRecord.txt file in each job folder for progress.")
 
