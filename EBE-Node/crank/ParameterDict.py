@@ -12,7 +12,7 @@ initial_condition_control = {
     # centrality cut variable: total_entropy or Npart
     'initial_condition_type': 'pre-generated',
     # type of initial conditions: superMC or pre-generated
-    'pre-generated_initial_file_path': '../IPGLASMA', 
+    'pre-generated_initial_file_path': '../../vgonzale/IPGLASMA',
     # file path for the pre-generated initial condition files
     'pre-generated_initial_file_pattern': 'epsilon-u-Hydro[1-3334].dat',  
     # name pattern for the initial condition files
