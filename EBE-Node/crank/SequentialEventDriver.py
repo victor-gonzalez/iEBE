@@ -202,6 +202,8 @@ iSSParameters = {
     'calculate_vn'                  :   0,
     'MC_sampling'                   :   2,
     'number_of_repeated_sampling'   :   100,
+    'y_LB'                          :   -2.5,
+    'y_RB'                          :   2.5,
 }
 
 iSControl = {
