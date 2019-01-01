@@ -64,7 +64,7 @@ iSSParameters = {
     'include_deltaf_shear'          :   1,
     'calculate_vn'                  :   0,
     'MC_sampling'                   :   1,
-    'number_of_repeated_sampling'   :   10,
+    'number_of_repeated_sampling'   :   100,
 }
 
 photonEmissionParameters = {
