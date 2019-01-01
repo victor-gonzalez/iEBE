@@ -16,8 +16,8 @@ tests/
 .settings/
 
 # running stuff
-PlayGround/
-RESULTS/
+PlayGround*/
+RESULTS*/
 saved_configs.py
 
 
