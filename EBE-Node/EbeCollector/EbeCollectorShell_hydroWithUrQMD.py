@@ -24,8 +24,12 @@ if len(argv)>=5:
     database_filename = argv[4]
 else:
     database_filename = "collected.db"
+if len(argv)>=6:
+    collect_mode = "fromIPGlasmaUrQMD"
+else:
+    collect_mode = "fromUrQMD"
 
 # call EbeCollector
 from EbeCollector import EbeCollector
 EbeCollector().collectParticleinfo(from_folder, subfolder_pattern)
-EbeCollector().createDatabaseFromEventFolders(from_folder, subfolder_pattern, database_filename, collectMode="fromUrQMD", multiplicityFactor=multiplicity_factor)
+EbeCollector().createDatabaseFromEventFolders(from_folder, subfolder_pattern, database_filename, collectMode=collect_mode, multiplicityFactor=multiplicity_factor)

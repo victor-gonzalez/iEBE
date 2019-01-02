@@ -1237,6 +1237,10 @@ class EbeCollector(object):
             called. In this mode "multiplicityFactor" will be passed
             along to collectFLowsAndMultiplicities_urqmdBinUtilityFormat
             function.
+            
+            -- "fromIPGlasmaUrQMD": The eccentricities should be
+            captured from the concrete IP Glasma event but this is
+            still not available.
 
             -- "fromPureHydro": For eccentricity it will set
             "oldStyleStorage=True" in the
@@ -1288,6 +1292,13 @@ class EbeCollector(object):
                 collect_flag = 1
                 # collect ecc
                 self.collectEccentricitiesAndRIntegrals(fullPath, event_id, db) 
+                # collect scalars
+                self.collectScalars(fullPath, event_id, db)
+                # collect flow
+                self.collectFLowsAndMultiplicities_urqmdBinUtilityFormat(
+                    fullPath, event_id, db, multiplicityFactor) 
+            elif collectMode == "fromIPGlasmaUrQMD":
+                collect_flag = 1
                 # collect scalars
                 self.collectScalars(fullPath, event_id, db)
                 # collect flow
