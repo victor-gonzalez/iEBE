@@ -63,7 +63,7 @@ iSSParameters = {
     'include_deltaf_bulk'           :   1,
     'include_deltaf_shear'          :   1,
     'calculate_vn'                  :   0,
-    'MC_sampling'                   :   1,
+    'MC_sampling'                   :   2,
     'number_of_repeated_sampling'   :   10,
 }
 

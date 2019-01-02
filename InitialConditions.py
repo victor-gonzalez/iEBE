@@ -11,4 +11,3 @@ initial_condition_control = {
     'pre-generated_initial_file_read_in_mode': 3, 
     # 2: read in mode for VISH2+1, 3: read in mode for IP Glasma
 }
-
