@@ -160,6 +160,7 @@ export QMDUSER=$(whoami)
     (cd ./finalResults
         root -b -q -l "/lustre/nyx/alice/users/$QMDUSER/UrQMDparser/runUrQMDParser.C(\\\"$QMDUSER\\\",\\\"urqmdCombined.txt\\\", $SLURM_ARRAY_TASK_ID)"
         mv UrQMD_output_$SLURM_ARRAY_TASK_ID.root $RESULTSFOLDER
+        rm urqmdCombined.txt
     )
     mv ./finalResults $RESULTSFOLDER/job-$SLURM_ARRAY_TASK_ID
 )
