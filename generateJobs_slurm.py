@@ -162,7 +162,8 @@ export QMDUSER=$(whoami)
         mv UrQMD_output_$SLURM_ARRAY_TASK_ID.root $RESULTSFOLDER
     )
     mv ./finalResults $RESULTSFOLDER/job-$SLURM_ARRAY_TASK_ID
-)    
+)
+rm -r job-$SLURM_ARRAY_TASK_ID
 """ 
 )
 if compressResultsFolderAnswer == "yes":
@@ -179,28 +180,33 @@ chmod(path.join(workingFolder, "job.sh"),0o755)
 if compressResultsFolderAnswer == "yes":
     EbeCollectorFolder = "EbeCollector"
     utilitiesFolder = "utilities"
+    watcherFolder = "watcher"
     watcherDirectory = path.join(workingFolder, "watcher")
     makedirs(path.join(watcherDirectory, ebeNodeFolder))
     copytree(path.join(ebeNodeFolder, EbeCollectorFolder), path.join(watcherDirectory, ebeNodeFolder, EbeCollectorFolder))
     copytree(utilitiesFolder, path.join(watcherDirectory, utilitiesFolder))
     open(path.join(workingFolder, "jobs.sh"), "a").write(
 """
-    sbatch -J watcher -d afterany:$JobID --time=%s --workdir=%s %s/watcher.sh %s %s %d
-""" % (walltime, watcherDirectory,watcherDirectory,utilitiesFolder, resultsFolder, numberOfJobs)
+    sbatch -J watcher -d afterany:$JobID --time=%s --workdir=%s %s/watcher.sh %s %s %s %d
+""" % (walltime, workingFolder, workingFolder, watcherFolder, utilitiesFolder, resultsFolder, numberOfJobs)
     )
 
-    open(path.join(watcherDirectory, "watcher.sh"), "w").write(
+    open(path.join(workingFolder, "watcher.sh"), "w").write(
 """#!/bin/bash
-UTILITIESFOLDER=$1
-RESULTSFOLDER=$2
-NUMBEROFJOBS=$3
-(cd $UTILITIESFOLDER
-    python autoZippedResultsCombiner.py $RESULTSFOLDER $NUMBEROFJOBS "job-(\d*).zip" 60 1> WatcherReport.txt 2> WatcherReport.txt
-    mv WatcherReport.txt $RESULTSFOLDER
+WATCHERFOLDER=$1
+UTILITIESFOLDER=$2
+RESULTSFOLDER=$3
+NUMBEROFJOBS=$4
+(cd $WATCHERFOLDER
+    (cd $UTILITIESFOLDER
+        python autoZippedResultsCombiner.py $RESULTSFOLDER $NUMBEROFJOBS "job-(\d*).zip" 60 1> WatcherReport.txt 2> WatcherReport.txt
+        mv WatcherReport.txt $RESULTSFOLDER
+    )
 )
+rm -r $WATCHERFOLDER
 """ 
     )
-    chmod(path.join(watcherDirectory, "watcher.sh"),0o755)
+    chmod(path.join(workingFolder, "watcher.sh"),0o755)
 
 
 import ParameterDict
