@@ -26,9 +26,9 @@ initial_condition_control = {
 }
 EOF
 
-./generateJobs_slurm.py $NJOBS $NEVTPERJOB ./PlayGround$CENTRALITY ./RESULTS$CENTRALITY 06:00:00
+./generateJobs_slurm.py $NJOBS $NEVTPERJOB ./PlayGround$CENTRALITY ./RESULTS$CENTRALITY 08:00:00
 sleep 2
 ./submitJobs_slurm.py
-sleep 4
+sleep 1
 
 done
