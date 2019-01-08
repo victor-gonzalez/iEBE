@@ -223,7 +223,7 @@ if initial_condition_type == 'pre-generated':
         head_file_pattern = file_pattern.split('[')[0]
         trail_file_pattern = file_pattern.split('[')[1].split(']')[1]
         total_nevents = int(file_pattern.split('[')[1].split(']')[0].split('-')[1])
-        nevents = random.sample(xrange(total_nevents+1),numberOfJobs*numberOfEventsPerJob)
+        nevents = random.sample(xrange(total_nevents),numberOfJobs*numberOfEventsPerJob)
         for jobno in range(numberOfJobs) :
             targetInitialConditionsFolder = path.join(workingFolder, "job-%d" % (jobno+1), "initial_conditions")
             makedirs(targetInitialConditionsFolder)
@@ -232,7 +232,7 @@ if initial_condition_type == 'pre-generated':
                      % (initial_file_path,
                         ParameterDict.initial_condition_control['centrality'].split('%')[0],
                         head_file_pattern,
-                        nevents[jobno*numberOfEventsPerJob+eventno],
+                        nevents[jobno*numberOfEventsPerJob+eventno]+1,
                         trail_file_pattern),targetInitialConditionsFolder)
     else :
         call("./copy_pre_generated_initial_conditions.sh %d %d %s %s" 
