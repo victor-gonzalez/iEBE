@@ -5,6 +5,7 @@ NEVTPERJOB=$2
 NCENTRALITIES=10
 CENTRALITIES=( "0-10" "10-20" "20-30" "30-40" "40-50" "50-60" "60-70" "70-80" "80-90" "90-100" )
 HIGHEREVTNOS=( 3970 3970 3254 3334 3260 3280 3334 3285 3334 3238 )
+TAG=`date +%Y%m%d%H%M`
 
 for ((i=0;i<$NCENTRALITIES;++i))  
 do
@@ -26,7 +27,7 @@ initial_condition_control = {
 }
 EOF
 
-./generateJobs_slurm.py $NJOBS $NEVTPERJOB ./PlayGround$CENTRALITY ./RESULTS$CENTRALITY 08:00:00
+./generateJobs_slurm.py $NJOBS $NEVTPERJOB ./$TAG/PlayGround$CENTRALITY ./$TAG/RESULTS$CENTRALITY 08:00:00
 sleep 2
 ./submitJobs_slurm.py
 sleep 1
