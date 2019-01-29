@@ -56,12 +56,21 @@ hydroParameters = {
                               # 0: initialize to 0; 1: initialze to Navier-Stock value
 }
 
+hydroMusicParameters = {
+    'Viscosity_Flag_Yes_1_No_0'     :   0,      # turn on viscosity in the evolution
+    'Include_Shear_Visc_Yes_1_No_0' :   0,      # include shear viscous effect
+    'Shear_to_S_ratio'              :   0.00,   # value of \eta/s
+    'T_dependent_Shear_to_S_ratio'  :   0,      # switch to turn on temperature dependent eta/s(T)
+    'Include_Bulk_Visc_Yes_1_No_0'  :   0,      # include bulk viscous effect
+    'Include_deltaf'                :   0,      # flag to include shear delta f correction in the Cooper-Frye formula
+}
+
 iSSParameters = {
     'hydro_mode'                    :   1,
-    'turn_on_bulk'                  :   1,
-    'turn_on_shear'                 :   1,
-    'include_deltaf_bulk'           :   1,
-    'include_deltaf_shear'          :   1,
+    'turn_on_bulk'                  :   0,
+    'turn_on_shear'                 :   0,
+    'include_deltaf_bulk'           :   0,
+    'include_deltaf_shear'          :   0,
     'calculate_vn'                  :   0,
     'MC_sampling'                   :   2,
     'number_of_repeated_sampling'   :   100,
