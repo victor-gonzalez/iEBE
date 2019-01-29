@@ -179,7 +179,7 @@ hydroControl = {
     'resultDir'             :   'results', # hydro results folder, relative
     'resultFiles'           :   '*', # results files
     'saveICFile'            :   True, # whether to save initial condition file
-    'saveResultGlobs'       :   ['*.h5','surface.dat', 'dec*.dat', 'ecc*.dat'], 
+    'saveResultGlobs'       :   ['*.h5','surface.dat', 'dec*.dat', 'ecc*.dat','music_input'], 
                                 # files match these globs will be saved
     'executable'            :   'mpihydro',
     'parameters'            :   hydroMusicParameters
