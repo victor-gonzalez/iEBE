@@ -57,12 +57,7 @@ hydroParameters = {
 }
 
 hydroMusicParameters = {
-    'Viscosity_Flag_Yes_1_No_0'     :   0,      # turn on viscosity in the evolution
-    'Include_Shear_Visc_Yes_1_No_0' :   0,      # include shear viscous effect
-    'Shear_to_S_ratio'              :   0.00,   # value of \eta/s
-    'T_dependent_Shear_to_S_ratio'  :   0,      # switch to turn on temperature dependent eta/s(T)
-    'Include_Bulk_Visc_Yes_1_No_0'  :   0,      # include bulk viscous effect
-    'Include_deltaf'                :   0,      # flag to include shear delta f correction in the Cooper-Frye formula
+    'Shear_to_S_ratio'              :   0.30,   # value of \eta/s
 }
 
 iSSParameters = {
