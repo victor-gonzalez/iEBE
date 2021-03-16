@@ -8,7 +8,7 @@ ctp 22 1.0
 #rsd 1944955121
 #
 # let particles decay without collisions
-# cto 16 -1 
+cto 16 -1
 #f13
 f14
 f15

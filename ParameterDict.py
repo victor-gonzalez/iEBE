@@ -56,16 +56,12 @@ hydroParameters = {
                               # 0: initialize to 0; 1: initialze to Navier-Stock value
 }
 
-hydroMusicParameters = {
-    'Shear_to_S_ratio'              :   0.30,   # value of \eta/s
-}
-
 iSSParameters = {
     'hydro_mode'                    :   1,
-    'turn_on_bulk'                  :   0,
-    'turn_on_shear'                 :   0,
-    'include_deltaf_bulk'           :   0,
-    'include_deltaf_shear'          :   0,
+    'turn_on_bulk'                  :   1,
+    'turn_on_shear'                 :   1,
+    'include_deltaf_bulk'           :   1,
+    'include_deltaf_shear'          :   1,
     'calculate_vn'                  :   0,
     'MC_sampling'                   :   2,
     'number_of_repeated_sampling'   :   100,
