@@ -117,13 +117,10 @@ for i in range(1, numberOfJobs+1):
 
 open(path.join(workingFolder, "jobs.slurm"), "w").write(
 """#!/bin/bash
-#SBATCH --job-name=iEBE-array
-#SBATCH --time=00:10:00
-#SBATCH --workdir=%s
-
-    ./jobs.sh
-""" % (workingFolder)
+sbatch --job-name=iEBE-array --time=00:10:00 --workdir=%s -- %s/jobs.sh
+""" % (workingFolder,workingFolder)
 )
+chmod(path.join(workingFolder, "jobs.slurm"),0o755)
 
 open(path.join(workingFolder, "jobs.sh"), "w").write(
 """#!/bin/bash
@@ -132,7 +129,7 @@ NEVTPERJOB=%d
 WORKDIRBASE=%s
 TIME=%s
 
-CMD="sbatch -J iEBE-batch --array=1-$NJOBS --workdir=$WORKDIRBASE --time=$TIME $WORKDIRBASE/job.sh %s $NEVTPERJOB %s"
+CMD="sbatch -J iEBE-batch --array=1-$NJOBS --workdir=$WORKDIRBASE --time=$TIME -- $WORKDIRBASE/job.sh %s $NEVTPERJOB %s"
 JobID=($(eval $CMD | tee | awk '{print $4}'))
 """ % (numberOfJobs, numberOfEventsPerJob, workingFolder, walltime, crankFolderName, resultsFolder)
 )
@@ -188,7 +185,7 @@ if compressResultsFolderAnswer == "yes":
     copytree(utilitiesFolder, path.join(watcherDirectory, utilitiesFolder))
     open(path.join(workingFolder, "jobs.sh"), "a").write(
 """
-    sbatch -J watcher -d afterany:$JobID --time=%s --workdir=%s %s/watcher.sh %s %s %s %d
+    sbatch -J watcher -d afterany:$JobID --time=%s --workdir=%s -- %s/watcher.sh %s %s %s %d
 """ % (walltime, workingFolder, workingFolder, watcherFolder, utilitiesFolder, resultsFolder, numberOfJobs)
     )
 

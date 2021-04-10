@@ -33,12 +33,12 @@ for mainentry in listdir(targetWorkingDirectory):
     if path.isdir(subFolder) :
         for aFile in listdir(subFolder):
             if path.splitext(aFile)[1].lower() == '.slurm':
-                commandString = "sbatch %s" % aFile
+                commandString = "./%s" % aFile
                 print("Submitting %s in %s..." % (aFile, subFolder))
                 call(commandString, shell=True, cwd=subFolder)
     else :
         if path.splitext(mainentry)[1].lower() == '.slurm':
-            commandString = "sbatch %s" % mainentry
+            commandString = "./%s" % mainentry
             print("Submitting %s in %s..." % (mainentry, targetWorkingDirectory))
             call(commandString, shell=True, cwd=targetWorkingDirectory)
         
